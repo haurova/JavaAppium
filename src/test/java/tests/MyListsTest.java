@@ -85,7 +85,7 @@ public class MyListsTest extends CoreTestCase
         String name_of_first_article = "Foals (band)";
         String name_of_second_article = "Interpol (band)";
         String name_of_folder = "Indie-rock bands";
-        String first_article_in_the_list = "Foals (band) British band"; //то же, что и для переменной выше
+        String first_article_in_the_list = "Foals (band) British band";
 
         NavigationUI NavigationUI = NavigationUIFactory.get(driver);
         MyListsPageObject MyListsPageObject = MyListsPageObjectFactory.get(driver);
@@ -103,16 +103,30 @@ public class MyListsTest extends CoreTestCase
 
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Foals");
-        SearchPageObject.clickbyArticleWithSubstring("Foals (band)");
+        SearchPageObject.clickbyArticleWithSubstring("British band");
 
         /* Создание нового списка на Android и добавление первой статьи в него; Добавление статьи в существующий список на iOS */
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
         if (Platform.getInstance().isAndroid()) {
             ArticlePageObject.addArticleToNewList(name_of_folder);
             ArticlePageObject.closeArticle();
-        } else {
+        } else if (Platform.getInstance().isIOS()) {
             ArticlePageObject.addArticleToExistingListFromTheArticleItself(name_of_folder);
             ArticlePageObject.closeArticle();
+        } else {
+            String article_title = ArticlePageObject.getArticleTitle();
+            ArticlePageObject.addArticlesToMySaved();
+
+            AuthorisationPageObject Auth = new AuthorisationPageObject(driver);
+            Auth.clickAuthButton();
+            Auth.enterLoginData(login, password);
+            Auth.submitForm();
+
+            ArticlePageObject.waitForTitleElement();
+
+            assertEquals("We are not at the same page after login", article_title, ArticlePageObject.getArticleTitle());
+            ArticlePageObject.addArticlesToMySaved();
+
         }
 
         /* Поиск второй статьи и добавление в только что созданный список */
@@ -121,28 +135,36 @@ public class MyListsTest extends CoreTestCase
             SearchPageObject.clearSearch();
         }
         SearchPageObject.typeSearchLine("Interpol");
-        SearchPageObject.clickbyArticleWithSubstring("Interpol (band)");
-        ArticlePageObject.addArticleToExistingListFromTheArticleItself(name_of_folder);
-        ArticlePageObject.closeArticle();
+        SearchPageObject.clickbyArticleWithSubstring("American rock band from New York City");
+
+        if (Platform.getInstance().isIOS() || Platform.getInstance().isAndroid()) {
+            ArticlePageObject.addArticleToExistingListFromTheArticleItself(name_of_folder);
+            ArticlePageObject.closeArticle();
+        } else {
+            ArticlePageObject.addArticlesToMySaved();
+        }
 
         /* Переход в списки для чтения и открытие созданного списка */
 
+        NavigationUI.openNavigationMenu();
         NavigationUI.clickMyLists();
 
-        MyListsPageObject.openFolderByName(name_of_folder);
+        if (Platform.getInstance().isAndroid() || Platform.getInstance().isIOS()) {
+            MyListsPageObject.openFolderByName(name_of_folder);
+        }
 
         /* Удаление первой статьи и проверка, что на странице осталась вторая */
         if (Platform.getInstance().isAndroid()){
 
-        MyListsPageObject.swipeByArticleToDelete(name_of_first_article);
-        MyListsPageObject.waitForArticleToAppearByTitle(name_of_second_article);
-        String title_of_remained_article = MyListsPageObject.getTitleOfTheArticleFromTheList();
+            MyListsPageObject.swipeByArticleToDelete(name_of_first_article);
+            MyListsPageObject.waitForArticleToAppearByTitle(name_of_second_article);
+            String title_of_remained_article = MyListsPageObject.getTitleOfTheArticleFromTheList();
 
-        assertEquals(
-                "Wrong article left (" + title_of_remained_article + ")",
-                name_of_second_article,
-                title_of_remained_article
-        );
+            assertEquals(
+                    "Wrong article left (" + title_of_remained_article + ")",
+                    name_of_second_article,
+                    title_of_remained_article
+            );
         } else {
             String article_title = MyListsPageObject.getTitleOfTheArticleFromTheList();
             MyListsPageObject.swipeByArticleToDelete(article_title);
@@ -150,12 +172,19 @@ public class MyListsTest extends CoreTestCase
             title_of_remained_article = title_of_remained_article.replace("\n", " ");
             System.out.println(title_of_remained_article);
 
-            assertEquals(
-                    "Wrong article left (" + title_of_remained_article + ")",
-                    first_article_in_the_list,
-                    title_of_remained_article
-            );
+            if (Platform.getInstance().isIOS()) {
+                assertEquals(
+                        "Wrong article left (" + title_of_remained_article + ")",
+                        first_article_in_the_list,
+                        title_of_remained_article
+                );
+            } else {
+                assertEquals(
+                        "Wrong article left (" + title_of_remained_article + ")",
+                        name_of_second_article,
+                        title_of_remained_article
+                );
+            }
         }
-
     }
 }
