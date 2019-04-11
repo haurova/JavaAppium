@@ -1,8 +1,7 @@
 package lib.ui;
 
-import io.appium.java_client.AppiumDriver;
 import lib.Platform;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 abstract public class MyListsPageObject extends MainPageObject
 {
@@ -13,7 +12,8 @@ abstract public class MyListsPageObject extends MainPageObject
             READING_LISTS_BUTTON,
             ADD_READING_LIST_BUTTON,
             READING_LIST_NAME_FIELD,
-            CREATE_READING_LIST_BUTTON;
+            CREATE_READING_LIST_BUTTON,
+            REMOVE_FROM_SAVED_BUTTON;
 
 
     private static String getFolderXpathByName(String name_of_folder)
@@ -21,12 +21,17 @@ abstract public class MyListsPageObject extends MainPageObject
         return FOLDER_BY_NAME_TML.replace("{FOLDER_NAME}", name_of_folder);
     }
 
-    private static String getSavedArticleXpathByTitle(String article_title)
+    private static String getRemoveButtonByTitle(String article_title)
     {
-            return ARTICLE_BY_TITLE_TML.replace("{TITLE}", article_title);
+            return REMOVE_FROM_SAVED_BUTTON.replace("{TITLE}", article_title);
         }
 
-    public MyListsPageObject(AppiumDriver driver)
+    private static String getSavedArticleXpathByTitle(String article_title)
+    {
+        return ARTICLE_BY_TITLE_TML.replace("{TITLE}", article_title);
+    }
+
+    public MyListsPageObject(RemoteWebDriver driver)
     {
         super(driver);
     }
@@ -52,7 +57,7 @@ abstract public class MyListsPageObject extends MainPageObject
         );
     }
 
-    public void waitForArticleToDissapearByTitle(String article_title)
+    public void waitForArticleToDisappearByTitle(String article_title)
     {
         String article_title_xpath = getSavedArticleXpathByTitle(article_title);
         this.waitForElementNotPresent(
@@ -62,18 +67,31 @@ abstract public class MyListsPageObject extends MainPageObject
         );
     }
 
-    public void swipeByArticleToDelete(String article_title)
-    {
-        this.waitForArticleToAppearByTitle(article_title);
-        String article_title_xpath = getSavedArticleXpathByTitle(article_title);
-        this.swipeElementToLeft(
-                article_title_xpath,
-                "Cannot find saved article"
-        );
+    public void swipeByArticleToDelete(String article_title) throws InterruptedException {
+        if(Platform.getInstance().isIOS() || Platform.getInstance().isAndroid()) {
+            this.waitForArticleToAppearByTitle(article_title);
+            String article_title_xpath = getSavedArticleXpathByTitle(article_title);
+
+            this.swipeElementToLeft(
+                    article_title_xpath,
+                    "Cannot find saved article"
+            );
+        } else {
+            String remove_locator = getRemoveButtonByTitle(article_title);
+            this.waitForElementAndClick(remove_locator, "Cannot click button to remove article from saved", 5);
+        }
+
         if(Platform.getInstance().isIOS()){
+            String article_title_xpath = getSavedArticleXpathByTitle(article_title);
             this.clickElementToTheRightUpperCorner(article_title_xpath, "Cannot find saved article");
         }
-        this.waitForArticleToDissapearByTitle(article_title);
+
+        if(Platform.getInstance().isMW()) {
+            Thread.sleep(5000);
+            driver.navigate().refresh();
+        }
+
+        this.waitForArticleToDisappearByTitle(article_title);
     }
 
     public String getTitleOfTheArticleFromTheList()
@@ -85,10 +103,17 @@ abstract public class MyListsPageObject extends MainPageObject
                     "Cannot find title of article",
                     15
             );
-        } else {
+        } else if (Platform.getInstance().isIOS()){
             return this.waitForElementAndGetAttribute(
                     ARTICLE_ID,
                     "name",
+                    "Cannot find title of article",
+                    15
+            );
+        } else {
+            return this.waitForElementAndGetAttribute(
+                    ARTICLE_ID,
+                    "title",
                     "Cannot find title of article",
                     15
             );

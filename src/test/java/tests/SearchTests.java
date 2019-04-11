@@ -14,10 +14,9 @@ public class SearchTests extends CoreTestCase
     {
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        //SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Java");
-        SearchPageObject.waitForSearchResult("Object-oriented programming language");
+        SearchPageObject.waitForSearchResult("bject-oriented programming language");
 
     }
 
@@ -27,7 +26,6 @@ public class SearchTests extends CoreTestCase
 
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Java");
         SearchPageObject.waitForCancelButtonAppear();
@@ -41,7 +39,6 @@ public class SearchTests extends CoreTestCase
     {
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
 
         String search_line = "Linkin park discography";
@@ -61,7 +58,6 @@ public class SearchTests extends CoreTestCase
     {
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Tea");
         SearchPageObject.waitForSearchResult("Drink made from infusing boiling water with the leaves of the tea plant");
@@ -77,7 +73,6 @@ public class SearchTests extends CoreTestCase
     public void test() {
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Back");
         SearchPageObject.waitForElementByTitleAndDescription("Human back", "Redirected from Back");

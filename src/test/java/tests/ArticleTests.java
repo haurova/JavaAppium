@@ -15,7 +15,7 @@ public class ArticleTests extends CoreTestCase {
 
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Java");
-        SearchPageObject.clickbyArticleWithSubstring("Object-oriented programming language");
+        SearchPageObject.clickbyArticleWithSubstring("bject-oriented programming language");
 
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
 
@@ -53,7 +53,6 @@ public class ArticleTests extends CoreTestCase {
         /* Пропуск онбординга и поиск статьи */
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
-        SearchPageObject.skipOnboarding();
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Foals");
 

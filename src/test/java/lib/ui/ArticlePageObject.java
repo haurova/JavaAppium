@@ -1,8 +1,8 @@
 package lib.ui;
 
-import io.appium.java_client.AppiumDriver;
 import lib.Platform;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 abstract public class ArticlePageObject extends MainPageObject
 {
@@ -10,6 +10,7 @@ abstract public class ArticlePageObject extends MainPageObject
         TITLE,
         FOOTER_ELEMENT,
         READING_LIST_BUTTON,
+        REMOVE_FROM_MY_LIST_BUTTON,
         ONBOARDING_GOT_IT_BUTTON,
         CREATE_NEW_LIST_BUTTON,
         CREATE_NEW_LIST_NAME_FIELD,
@@ -22,7 +23,7 @@ abstract public class ArticlePageObject extends MainPageObject
         TOOLBAR;
 
 
-    public ArticlePageObject(AppiumDriver driver)
+    public ArticlePageObject(RemoteWebDriver driver)
     {
         super(driver);
     }
@@ -38,8 +39,10 @@ abstract public class ArticlePageObject extends MainPageObject
         WebElement title_element = waitForTitleElement();
         if (Platform.getInstance().isAndroid()) {
             return title_element.getAttribute("text");
-        } else {
+        } else if (Platform.getInstance().isIOS()) {
             return title_element.getAttribute("name");
+        } else {
+            return title_element.getText();
         }
     }
 
@@ -47,8 +50,10 @@ abstract public class ArticlePageObject extends MainPageObject
     {
         if(Platform.getInstance().isAndroid()) {
             this.swipeUpToFindElement(FOOTER_ELEMENT, "Cannot find the end of article", 40);
-        } else {
+        } else if (Platform.getInstance().isIOS()) {
             this.swipeUpTillElementAppear(FOOTER_ELEMENT, "Cannot find the end of article", 40);
+        } else {
+            this.scrollWebPageTillElementNotVisible(FOOTER_ELEMENT, "Cannot find the end of article", 40);
         }
     }
 
@@ -97,7 +102,7 @@ abstract public class ArticlePageObject extends MainPageObject
         this.waitForElementAndClick(name_of_folder_xpath, "Cannot find reading list with name '" + name_of_folder + "' in the list", 10);
     }
 
-    public void addArticleToExistingList(String name_of_folder)
+    public void addArticleToExistingListFromTheArticleItself(String name_of_folder)
     {
         this.waitForElementAndClick(
                 READING_LIST_BUTTON,
@@ -117,17 +122,35 @@ abstract public class ArticlePageObject extends MainPageObject
         }
     }
 
+
+
     public void addArticlesToMySaved() {
+        if(Platform.getInstance().isMW()) {
+            this.removeArticleFromSavedIfItAdded();
+        }
         this.waitForElementAndClick(READING_LIST_BUTTON, "Cannot find 'Save to reading list' button",10);
+    }
+
+    public void removeArticleFromSavedIfItAdded()
+    {
+        if (this.isElementPresent(REMOVE_FROM_MY_LIST_BUTTON)) {
+            this.waitForElementAndClick(REMOVE_FROM_MY_LIST_BUTTON, "Cannot click remove an article from the list", 1);
+            this.waitForElementPresent(READING_LIST_BUTTON, "Cannot find the button to add the article to the list after removing it", 10);
+        }
     }
 
     public void closeArticle()
     {
-        this.waitForElementAndClick(
-                BACK_BUTTON,
-                "Cannot find 'Back' button",
-                5
-        );
+        if (Platform.getInstance().isIOS() || Platform.getInstance().isAndroid()) {
+            this.waitForElementAndClick(
+                    BACK_BUTTON,
+                    "Cannot find 'Back' button",
+                    5
+            );
+        } else {
+            System.out.println("Method closeArticle() does nothing for platform " + Platform.getInstance().getPlatformVar());
+        }
+
     }
 
     public void closeSyncPopup()

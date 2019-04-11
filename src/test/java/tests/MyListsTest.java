@@ -2,10 +2,7 @@ package tests;
 
 import lib.CoreTestCase;
 import lib.Platform;
-import lib.ui.ArticlePageObject;
-import lib.ui.MyListsPageObject;
-import lib.ui.NavigationUI;
-import lib.ui.SearchPageObject;
+import lib.ui.*;
 import lib.ui.factories.ArticlePageObjectFactory;
 import lib.ui.factories.MyListsPageObjectFactory;
 import lib.ui.factories.NavigationUIFactory;
@@ -15,16 +12,19 @@ import org.junit.Test;
 public class MyListsTest extends CoreTestCase
 {
     private static String name_of_folder = "Learning programming";
+    private static final String
+                    login = "Haurova",
+                    password = "19031990";
+
 
     @Test
-    public void testSaveFirstArticleToMyList()
-    {
+    public void testSaveFirstArticleToMyList() throws InterruptedException {
 
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
 
         SearchPageObject.initSearchInput();
         SearchPageObject.typeSearchLine("Java");
-        SearchPageObject.clickbyArticleWithSubstring("Object-oriented programming language");
+        SearchPageObject.clickbyArticleWithSubstring("bject-oriented programming language");
 
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
         ArticlePageObject.waitForTitleElement();
@@ -35,13 +35,28 @@ public class MyListsTest extends CoreTestCase
             ArticlePageObject.addArticlesToMySaved();
         }
 
+        if (Platform.getInstance().isMW()) {
+            String article_title = ArticlePageObject.getArticleTitle();
+
+            AuthorisationPageObject Auth = new AuthorisationPageObject(driver);
+            Auth.clickAuthButton();
+            Auth.enterLoginData(login, password);
+            Auth.submitForm();
+
+            ArticlePageObject.waitForTitleElement();
+
+            assertEquals("We are not at the same page after login", article_title, ArticlePageObject.getArticleTitle());
+            ArticlePageObject.addArticlesToMySaved();
+
+        }
+
         ArticlePageObject.closeArticle();
         if(Platform.getInstance().isAndroid()) {
             ArticlePageObject.closeSyncPopup();
         }
 
         NavigationUI NavigationUI = NavigationUIFactory.get(driver);
-
+        NavigationUI.openNavigationMenu();
         NavigationUI.clickMyLists();
 
         if(Platform.getInstance().isIOS()) {
@@ -66,8 +81,7 @@ public class MyListsTest extends CoreTestCase
 
     /** Ex5: Тест: сохранение двух статей */
     @Test
-    public void testSaveTwoArticlesAndDeleteOne()
-    {
+    public void testSaveTwoArticlesAndDeleteOne() throws InterruptedException {
         String name_of_first_article = "Foals (band)";
         String name_of_second_article = "Interpol (band)";
         String name_of_folder = "Indie-rock bands";
@@ -97,7 +111,7 @@ public class MyListsTest extends CoreTestCase
             ArticlePageObject.addArticleToNewList(name_of_folder);
             ArticlePageObject.closeArticle();
         } else {
-            ArticlePageObject.addArticleToExistingList(name_of_folder);
+            ArticlePageObject.addArticleToExistingListFromTheArticleItself(name_of_folder);
             ArticlePageObject.closeArticle();
         }
 
@@ -108,7 +122,7 @@ public class MyListsTest extends CoreTestCase
         }
         SearchPageObject.typeSearchLine("Interpol");
         SearchPageObject.clickbyArticleWithSubstring("Interpol (band)");
-        ArticlePageObject.addArticleToExistingList(name_of_folder);
+        ArticlePageObject.addArticleToExistingListFromTheArticleItself(name_of_folder);
         ArticlePageObject.closeArticle();
 
         /* Переход в списки для чтения и открытие созданного списка */

@@ -1,7 +1,7 @@
 package lib.ui.ios;
 
-import io.appium.java_client.AppiumDriver;
 import lib.ui.MyListsPageObject;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class iOSMyListsPageObjects extends MyListsPageObject {
 
@@ -16,7 +16,7 @@ public class iOSMyListsPageObjects extends MyListsPageObject {
         FOLDER_BY_NAME_TML = "xpath://XCUIElementTypeLink[@name='{FOLDER_NAME}']";
     }
 
-    public iOSMyListsPageObjects(AppiumDriver driver)
+    public iOSMyListsPageObjects(RemoteWebDriver driver)
     {
         super(driver);
     }

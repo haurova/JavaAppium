@@ -1,7 +1,7 @@
 package lib.ui.ios;
 
-import io.appium.java_client.AppiumDriver;
 import lib.ui.SearchPageObject;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class iOSSearchPageObject extends SearchPageObject
 
@@ -18,7 +18,7 @@ public class iOSSearchPageObject extends SearchPageObject
         CLEAR_BUTTON = "id:clear mini";
     }
 
-    public iOSSearchPageObject(AppiumDriver driver)
+    public iOSSearchPageObject(RemoteWebDriver driver)
     {
         super(driver);
     }

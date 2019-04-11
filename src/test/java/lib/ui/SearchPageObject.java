@@ -1,8 +1,6 @@
 package lib.ui;
 
-import io.appium.java_client.AppiumDriver;
-import lib.CoreTestCase;
-import lib.Platform;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 abstract public class SearchPageObject extends MainPageObject
 {
@@ -19,16 +17,16 @@ abstract public class SearchPageObject extends MainPageObject
         CLEAR_BUTTON;
 
 
-    public SearchPageObject(AppiumDriver driver)
+    public SearchPageObject(RemoteWebDriver driver)
     {
         super(driver);
 
     }
 
     /* TEMPLATE METHODS */
-    private static String getSearchResultElement(String subsctring)
+    private static String getSearchResultElement(String substring)
     {
-        return SEARCH_RESULT_BY_SUBSTRING_TPL.replace("{SUBSTRING}", subsctring);
+        return SEARCH_RESULT_BY_SUBSTRING_TPL.replace("{SUBSTRING}", substring);
     }
 
     private static String getSearchResultElementbyTitleAndDescription(String title, String description)
